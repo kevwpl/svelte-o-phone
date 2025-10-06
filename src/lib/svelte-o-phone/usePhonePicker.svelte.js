@@ -128,8 +128,10 @@ export function usePhonePicker(options = {}) {
 
     return {
         get input() { return input; },
+        set input(value) { input = value; },
         get selectedCountry() { return selectedCountry; },
         get dropdownOpen() { return dropdownOpen; },
+        set dropdownOpen(value) { dropdownOpen = value; },
         get countryList() { return countryList; },
         get fullValue() { return fullValue; },
         get isValid() { return isValid; },

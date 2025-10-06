@@ -1,5 +1,5 @@
 {
-  "name": "svelte-o-phone",
+  "name": "@kevwpl/svelte-o-phone",
   "version": "0.0.1",
   "type": "module",
   "private": false,
@@ -71,5 +71,24 @@
   },
   "peerDependencies": {
     "svelte": ">=5.0.0"
-  }
+  },
+  "description": "A flexible, headless phone number input component for Svelte 5 (with runes), powered by `libphonenumber-js`.",
+  "main": "svelte.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kevwpl/svelte-o-phone.git"
+  },
+  "keywords": [
+    "svelte",
+    "phone",
+    "input",
+    "telephone",
+    "tel",
+    "headless"
+  ],
+  "author": "kevwpl",
+  "bugs": {
+    "url": "https://github.com/kevwpl/svelte-o-phone/issues"
+  },
+  "homepage": "https://github.com/kevwpl/svelte-o-phone#readme"
 }
