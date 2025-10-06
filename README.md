@@ -1,6 +1,6 @@
 # 📞 svelte-o-phone
 
-A flexible, headless phone number input component for Svelte 5 (with runes), powered by `libphonenumber-js`.
+A flexible, headless phone number input component for Svelte, powered by `libphonenumber-js`.
 
 [![npm version](https://img.shields.io/npm/v/svelte-o-phone?style=flat-square)](https://www.npmjs.com/package/@kevwpl/svelte-o-phone)
 [![npm downloads](https://img.shields.io/npm/dm/svelte-o-phone?style=flat-square)](https://www.npmjs.com/package/@kevwpl/svelte-o-phone)
