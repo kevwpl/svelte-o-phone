@@ -2,8 +2,8 @@
 
 A flexible, headless phone number input component for Svelte 5 (with runes), powered by `libphonenumber-js`.
 
-[![npm version](https://img.shields.io/npm/v/svelte-o-phone?style=flat-square)](https://www.npmjs.com/package/svelte-o-phone)
-[![npm downloads](https://img.shields.io/npm/dm/svelte-o-phone?style=flat-square)](https://www.npmjs.com/package/svelte-o-phone)
+[![npm version](https://img.shields.io/npm/v/svelte-o-phone?style=flat-square)](https://www.npmjs.com/package/@kevwpl/svelte-o-phone)
+[![npm downloads](https://img.shields.io/npm/dm/svelte-o-phone?style=flat-square)](https://www.npmjs.com/package/@kevwpl/svelte-o-phone)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Svelte 5](https://img.shields.io/badge/Svelte-5-FF3E00?logo=svelte)](https://svelte.dev/blog/runes)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript)](https://www.typescriptlang.org/)
@@ -27,126 +27,6 @@ yarn add svelte-o-phone libphonenumber-js
 ## 💡 Usage
 
 `svelte-o-phone` provides a headless hook, `usePhonePicker`, for maximum flexibility, and a basic pre-styled `PhonePicker` component (if included in your package exports) for quick setup.
-
-### The Headless `usePhonePicker` Hook
-
-This is the recommended way to integrate for full UI control.
-
-```svelte
-<script>
-  import { usePhonePicker } from 'svelte-o-phone';
-  import { Input } from '$lib/components/ui/input'; // Example Shadcn-Svelte Input
-  import { Button } from '$lib/components/ui/button'; // Example Shadcn-Svelte Button
-  // ... import other UI components (Popover, Command, Check, ChevronDown etc.)
-
-  let phoneNumber = $state('');
-  let countryCode = $state('US'); // Can be dynamically changed or bound
-
-  const picker = usePhonePicker({
-    initialValue: phoneNumber,
-    initialCountry: countryCode,
-    sorting: 'alphabetic', // 'numeric' | 'custom'
-    // allowedCountries: ['US', 'GB', 'DE'], // Optional: filter countries
-    // customOrder: ['US', 'DE'],          // Optional: for 'custom' sorting
-    onchange: (data) => {
-      // data: { value: string, valid: boolean, country: string, formatted: string }
-      phoneNumber = data.value;
-      countryCode = data.country;
-      console.log('Current phone state:', data);
-    }
-  });
-
-  // For refocusing button after selection (accessibility)
-  let triggerButtonRef = $state(null); 
-  function closeAndFocusTrigger() {
-    picker.closeDropdown();
-    if (triggerButtonRef) {
-      triggerButtonRef.focus();
-    }
-  }
-
-  // Reactive state for Command.Input search
-  let searchValue = $state('');
-  const filteredCountryList = $derived(() => {
-    if (!searchValue) return picker.countryList;
-    const lowerSearch = searchValue.toLowerCase();
-    return picker.countryList.filter(c => 
-      c.name.toLowerCase().includes(lowerSearch) ||
-      c.dialCode.includes(searchValue)
-    );
-  });
-</script>
-
-<!-- Example UI using Shadcn-Svelte components -->
-<div class="flex gap-2">
-  <Popover.Root bind:open={picker.dropdownOpen}>
-    <Popover.Trigger bind:ref={triggerButtonRef} asChild>
-      <Button
-        variant="outline"
-        class="w-[120px] justify-between"
-        role="combobox"
-        aria-expanded={picker.dropdownOpen}
-        aria-label="Select country"
-      >
-        <div class="flex items-center gap-2 overflow-hidden">
-          <span class="text-lg">{picker.selectedCountry.flag}</span>
-          <span class="whitespace-nowrap overflow-hidden text-ellipsis">
-            {picker.selectedCountry.dialCode}
-          </span>
-        </div>
-        <ChevronDown class="ml-2 size-4 shrink-0 opacity-50" />
-      </Button>
-    </Popover.Trigger>
-    <Popover.Content class="w-[var(--radix-popover-trigger-width)] p-0">
-      <Command.Root>
-        <Command.Input
-          placeholder="Search country..."
-          bind:value={searchValue}
-        />
-        <Command.List>
-          <Command.Empty>No country found.</Command.Empty>
-          <Command.Group>
-            {#each filteredCountryList as c (c.code)}
-              <Command.Item
-                value={c.name}
-                onSelect={() => {
-                  picker.selectCountry(c);
-                  closeAndFocusTrigger();
-                  searchValue = ''; // Clear search after selection
-                }}
-              >
-                <Check
-                  class={cn(
-                    "mr-2 size-4",
-                    c.code !== picker.selectedCountry.code && "text-transparent"
-                  )}
-                />
-                <span class="flag text-lg">{c.flag}</span>
-                <span class="name flex-1 ml-2">{c.name}</span>
-                <span class="code text-muted-foreground">{c.dialCode}</span>
-              </Command.Item>
-            {/each}
-          </Command.Group>
-        </Command.List>
-      </Command.Root>
-    </Popover.Content>
-  </Popover.Root>
-
-  <Input
-    use:picker.bindInput
-    type="tel"
-    placeholder="Phone number"
-    value={picker.input}
-    oninput={picker.handleInput}
-    aria-label="Phone number input"
-    class="flex-1"
-  />
-</div>
-
-<p>Full Value: {phoneNumber}</p>
-<p>Country Code: {countryCode}</p>
-<p>Is Valid: {picker.isValid ? 'Yes' : 'No'}</p>
-```
 
 ## 📚 API Reference
 
