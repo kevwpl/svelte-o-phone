@@ -11,12 +11,13 @@
     import {Badge} from "$lib/components/ui/badge/index.js";
     import {PMCommand} from "$lib/components/ui/pm-command/index.js";
     import PreviewCodeTabs from "$lib/PreviewCodeTabs.svelte";
-    import { Phone, Info } from "@lucide/svelte";
+    import { Phone, Info, GithubIcon } from "@lucide/svelte";
     import * as Item from "$lib/components/ui/item/index.js";
     import * as Code from '$lib/components/ui/code';
     import * as Toc from '$lib/components/ui/toc';
     import * as Alert from "$lib/components/ui/alert/index.js";
     import {UseToc} from "$lib/hooks/use-toc.svelte.js";
+    import {Button} from "$lib/components/ui/button/index.js";
 
 
     const toc = new UseToc();
@@ -135,4 +136,10 @@
 
 <div class="fixed top-20 left-10">
     <Toc.Root toc={toc.current}/>
+</div>
+
+<div class="fixed top-20 right-10">
+    <Button size="icon" href="https://github.com/kevwpl/svelte-o-phone" target="_blank">
+            <GithubIcon />
+    </Button>
 </div>
