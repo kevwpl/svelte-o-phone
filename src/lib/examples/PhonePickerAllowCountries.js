@@ -26,7 +26,7 @@ export const phonePickerAllowCountries = `import { PhonePicker } from '<script>
 
 
 <ButtonGroup.Root>
-    <Select.Root bind:open={picker.dropdownOpen} type="single">
+    <Select.Root open={picker.dropdownOpen} type="single">
         <Select.Trigger onclick={() => picker.toggleDropdown()}>
             <span>{picker.selectedCountry.flag}</span>
             <span>{picker.selectedCountry.dialCode}</span>

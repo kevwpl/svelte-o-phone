@@ -11,10 +11,11 @@
     import {Badge} from "$lib/components/ui/badge/index.js";
     import {PMCommand} from "$lib/components/ui/pm-command/index.js";
     import PreviewCodeTabs from "$lib/PreviewCodeTabs.svelte";
-    import { Phone } from "@lucide/svelte";
+    import { Phone, Info } from "@lucide/svelte";
     import * as Item from "$lib/components/ui/item/index.js";
     import * as Code from '$lib/components/ui/code';
     import * as Toc from '$lib/components/ui/toc';
+    import * as Alert from "$lib/components/ui/alert/index.js";
     import {UseToc} from "$lib/hooks/use-toc.svelte.js";
 
 
@@ -84,14 +85,17 @@
 
     <div class="mt-8">
         <h2 class="text-2xl font-semibold mb-4" id="installation">Installation</h2>
-        <PMCommand class="mt-2" command="add" args={['svelte-o-phone']} agents={['npm', 'pnpm']} />
+        <Alert.Root class="mt-4">
+            <Info />
+            <Alert.Title>More package managers coming soon...</Alert.Title>
+        </Alert.Root>
+        <PMCommand class="mt-2" command="add" args={['@kevwpl/svelte-o-phone']} agents={['npm']} />
 
         <p class="text-muted-foreground my-4">
             This component relies on <span class="font-mono">libphonenumber-js</span> for phone number parsing, formatting, and validation.
-            Install it separately:
+            This package will be installed automatically when you install <span class="font-mono">svelte-o-phone</span>.
         </p>
 
-        <PMCommand class="mt-2" command="add" args={['libphonenumber-js']} agents={['npm', 'pnpm']} />
     </div>
 
 
