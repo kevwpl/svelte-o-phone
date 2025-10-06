@@ -128,7 +128,7 @@ export function usePhonePicker(options = {}) {
 
     return {
         get input() { return input; },
-        set input(value) { input = value; },
+        set input(value) { },
         get selectedCountry() { return selectedCountry; },
         get dropdownOpen() { return dropdownOpen; },
         get countryList() { return countryList; },
