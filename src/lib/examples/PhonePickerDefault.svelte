@@ -3,13 +3,15 @@
     import * as ButtonGroup from "$lib/components/ui/button-group/index.js";
     import * as Select from "$lib/components/ui/select/index.js";
     import {Input} from "$lib/components/ui/input/index.js";
-    
+
     let {
         value = $bindable(''),
         country = $bindable(null),
         placeholder = 'Phone number',
         onchange = () => {}
     } = $props();
+
+    let inputElement = $state(null);
 
     const picker = usePhonePicker({
         initialValue: value,
@@ -21,33 +23,41 @@
             onchange(data);
         }
     });
+
+    $effect(() => {
+        if (inputElement) {
+            picker.bindInput(inputElement);
+            console.log("BOUND")
+        }
+    });
 </script>
 
 
 <ButtonGroup.Root>
-    <Select.Root open={picker.dropdownOpen} type="single">
+    <Select.Root open={picker.dropdownOpen} bind:value={picker.selectedCountryCode} type="single">
         <Select.Trigger onclick={() => picker.toggleDropdown()}>
             <span>{picker.selectedCountry.flag}</span>
             <span>{picker.selectedCountry.dialCode}</span>
         </Select.Trigger>
         <Select.Content>
             {#each picker.countryList as c}
-                <li
+                <Select.Item
+                        value={c.code}
                         class="flex gap-2 items-center p-2 cursor-pointer"
-                        role="option"
                         onclick={() => picker.selectCountry(c)}>
                     <span class="flag">{c.flag}</span>
                     <span class="name">{c.name}</span>
                     <span class="code">{c.dialCode}</span>
-                </li>
+                </Select.Item>
             {/each}
         </Select.Content>
     </Select.Root>
     <Input
-          type="tel"
-          {placeholder}
-          bind:value={picker.input}
-          oninput={picker.handleInput}
-          aria-label="Phone number input"
+            bind:ref={picker.ref}
+            type="tel"
+            {placeholder}
+            value={picker.input}
+            oninput={picker.handleInput}
+            aria-label="Phone number input"
     />
 </ButtonGroup.Root>

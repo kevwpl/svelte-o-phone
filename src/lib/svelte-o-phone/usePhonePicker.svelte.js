@@ -50,9 +50,10 @@ export function usePhonePicker(options = {}) {
     let dropdownOpen = $state(false);
     let fullValue = $state('');
     let isValid = $state(false);
-    let inputElement = null;
+    let internalInputElement = null; // Internal storage for the DOM element
     let currentSorting = $state(sorting);
     let currentCustomOrder = $state(customOrder);
+    let ref = $state(null); // Exposed ref variable for binding
 
     let countryList = $derived(sortCountries(baseCountryList, currentSorting, currentCustomOrder));
     let selectedCountry = $state(countryList.find(c => c.code === initialCountry) || countryList[0]);
@@ -69,12 +70,10 @@ export function usePhonePicker(options = {}) {
     }
 
     function handleInput(e) {
-        const cursorPos = e.target.selectionStart;
-        const prevLength = input.length;
-        input = e.target.value;
+        const rawValue = e.target.value;
 
         const asYou = new AsYouType(selectedCountry.code);
-        const formatted = asYou.input(input);
+        const formatted = asYou.input(rawValue);
         const parsed = parsePhoneNumberFromString(formatted, selectedCountry.code);
         isValid = parsed ? parsed.isValid() : false;
 
@@ -86,14 +85,17 @@ export function usePhonePicker(options = {}) {
             formatted
         });
 
-        requestAnimationFrame(() => {
-            if (inputElement && formatted.length >= prevLength) {
-                const lengthDiff = formatted.length - prevLength;
-                inputElement.setSelectionRange(cursorPos + lengthDiff, cursorPos + lengthDiff);
-            }
-        });
-
         input = formatted;
+
+        setTimeout(() => {
+            console.log("HAALLLOOO22222")
+            if (internalInputElement) {
+                const endPos = formatted.length;
+                internalInputElement.focus();
+                internalInputElement.setSelectionRange(endPos, endPos);
+                console.log("HAALLLOOO")
+            }
+        }, 0);
     }
 
     function selectCountry(c) {
@@ -117,8 +119,12 @@ export function usePhonePicker(options = {}) {
         dropdownOpen = false;
     }
 
-    function bindInput(element) {
-        inputElement = element;
+    // Internal bind function - called when ref is set
+    function internalBindInput(element) {
+        if (element && element.setSelectionRange) {
+            internalInputElement = element;
+            console.log('Bound input element from ref:', element);
+        }
     }
 
     function changeSorting(newSorting, newCustomOrder = null) {
@@ -128,20 +134,23 @@ export function usePhonePicker(options = {}) {
 
     return {
         get input() { return input; },
-        set input(value) { },
         get selectedCountry() { return selectedCountry; },
+        set selectedCountry(value) { selectedCountry = value; },
+        get selectedCountryCode() { return selectedCountry.code; },
+        set selectedCountryCode(value) { selectedCountry = countryList.find(c => c.code === value) || countryList[0]; },
         get dropdownOpen() { return dropdownOpen; },
         get countryList() { return countryList; },
         get fullValue() { return fullValue; },
         get isValid() { return isValid; },
         get currentSorting() { return currentSorting; },
         get currentCustomOrder() { return currentCustomOrder; },
+        get ref() { return ref; }, // Expose the ref variable for binding
+        set ref(value) { ref = value; internalBindInput(value); }, // Auto-bind when set
         handleInput,
         selectCountry,
         toggleDropdown,
         openDropdown,
         closeDropdown,
-        bindInput,
         changeSorting
     };
 }
