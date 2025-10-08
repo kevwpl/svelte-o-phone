@@ -8,6 +8,9 @@ export function usePhonePicker(options = {}) {
         allowedCountries = null,
         sorting = 'alphabetic',
         customOrder = null,
+        autoDetectCountry = true,
+        detectInitialCountry = false,
+        detectionPriority = ['language', 'ip'],
         onchange = () => {}
     } = options;
 
@@ -19,8 +22,8 @@ export function usePhonePicker(options = {}) {
         switch (sortType) {
             case 'numeric':
                 return [...list].sort((a, b) => {
-                    const numA = parseInt(a.dialCode.replace(/^\+/, '').replace(/[^\d]/g, ''));
-                    const numB = parseInt(b.dialCode.replace(/^\+/, '').replace(/[^\d]/g, ''));
+                    const numA = parseInt(a.dialCode.replace(/\D/g, ''));
+                    const numB = parseInt(b.dialCode.replace(/\D/g, ''));
                     return numA - numB;
                 });
             case 'custom':
@@ -53,6 +56,40 @@ export function usePhonePicker(options = {}) {
     let countryList = $derived(sortCountries(baseCountryList, currentSorting, currentCustomOrder));
     let selectedCountry = $state(countryList.find(c => c.code === initialCountry) || countryList[0]);
 
+    $effect(() => {
+        if (!detectInitialCountry) return;
+
+        const detectors = {
+            language: () => {
+                if (typeof navigator === 'undefined' || !navigator.language) return null;
+                const langCode = navigator.language.split('-').pop()?.toUpperCase();
+                return countryList.find(c => c.code === langCode) || null;
+            },
+            ip: async () => {
+                try {
+                    const response = await fetch('https://ipinfo.io/json');
+                    if (!response.ok) return null;
+                    const data = await response.json();
+                    return countryList.find(c => c.code === data.country) || null;
+                } catch (error) {
+                    return null;
+                }
+            }
+        };
+
+        (async () => {
+            for (const method of detectionPriority) {
+                if (detectors[method]) {
+                    const country = await detectors[method]();
+                    if (country) {
+                        selectCountry(country);
+                        return;
+                    }
+                }
+            }
+        })();
+    });
+
     if (initialValue) {
         const parsed = parsePhoneNumberFromString(initialValue);
         if (parsed) {
@@ -70,38 +107,62 @@ export function usePhonePicker(options = {}) {
         const rawValue = e.target.value;
         const cursorPos = internalInputElement.selectionStart;
 
-        const digitsBeforeCursor = rawValue.substring(0, cursorPos).replace(/\D/g, '').length;
+        if (autoDetectCountry && rawValue.startsWith('+')) {
+            let matchedCountry = null;
+            const potentialCodeDigits = rawValue.replace(/\D/g, '');
+            const possibleMatches = countryList.filter(c => {
+                const countryCodeDigits = c.dialCode.replace(/\D/g, '');
+                return potentialCodeDigits.startsWith(countryCodeDigits);
+            });
+            if (possibleMatches.length > 0) {
+                matchedCountry = possibleMatches.reduce((longest, current) => {
+                    return current.dialCode.length > longest.dialCode.length ? current : longest;
+                });
+            }
+            if (matchedCountry && matchedCountry.code !== selectedCountry.code) {
+                selectedCountry = matchedCountry;
+            }
+        }
 
+        const digitsBeforeCursor = rawValue.substring(0, cursorPos).replace(/\D/g, '').length;
+        const startsWithPlus = rawValue.startsWith('+');
         const digitsOnly = rawValue.replace(/\D/g, '');
+
+        if (rawValue === '+') {
+            input = '+';
+            setTimeout(() => {
+                if (internalInputElement) internalInputElement.setSelectionRange(1, 1);
+            }, 0);
+            return;
+        }
 
         const asYou = new AsYouType(selectedCountry.code);
         let formatted = '';
-        for (const digit of digitsOnly) {
-            formatted = asYou.input(digit);
+        if (startsWithPlus) {
+            formatted = asYou.input(rawValue);
+        } else {
+            for (const digit of digitsOnly) {
+                formatted = asYou.input(digit);
+            }
         }
 
         const parsed = parsePhoneNumberFromString(formatted, selectedCountry.code);
         isValid = parsed ? parsed.isValid() : false;
         fullValue = parsed ? parsed.number : formatted;
-
         onchange({ value: fullValue, valid: isValid, country: selectedCountry.code, formatted });
-
         input = formatted;
 
         let newCursorPos = 0;
         let digitCount = 0;
         for (let i = 0; i < formatted.length; i++) {
-            if (/\d/.test(formatted[i])) {
-                digitCount++;
-            }
+            if (/\d/.test(formatted[i])) digitCount++;
             if (digitCount >= digitsBeforeCursor) {
                 newCursorPos = i + 1;
                 break;
             }
         }
-        if (digitCount < digitsBeforeCursor) {
-            newCursorPos = formatted.length;
-        }
+        if (digitCount < digitsBeforeCursor) newCursorPos = formatted.length;
+        if (startsWithPlus && cursorPos <= 1 && newCursorPos === 0) newCursorPos = 1;
 
         setTimeout(() => {
             if (internalInputElement && document.activeElement === internalInputElement) {

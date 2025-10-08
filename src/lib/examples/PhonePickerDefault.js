@@ -14,6 +14,7 @@ export const phonePickerDefaultCode = `<script>
   const picker = usePhonePicker({
     initialValue: value,
     initialCountry: country || 'US',
+    detectInitialCountry: true,
     sorting: 'numeric',
     onchange: (data) => {
       value = data.value;

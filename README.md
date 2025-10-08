@@ -14,10 +14,6 @@ Install the package and its peer dependency.
 
 ```bash
 npm install svelte-o-phone libphonenumber-js
-# or pnpm
-pnpm add svelte-o-phone libphonenumber-js
-# or yarn
-yarn add svelte-o-phone libphonenumber-js
 ```
 
 ### Peer Dependencies
